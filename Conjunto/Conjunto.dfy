@@ -1,7 +1,7 @@
-/* TRABALHO 1: METODOS FORMAIS */
-/*  INTEGRANTES
-    * Carlos Rodrigues
-    * Thiago Nitschke
+/* METODOS FORMAIS: TRABALHO 1 */
+/* ALUNOS:
+ * Carlos Rodrigues
+ * Thiago Nitschke
 */
 
 
@@ -86,26 +86,47 @@ class {:autocontracts} Conjunto
         }
     }
 
-    // method Remover(x:nat) returns (r:bool)
-    // requires Conteudo != []
-    // ensures Conteudo == old(Conteudo)[1..]
-    // ensures |Conteudo| == |old(Conteudo)| - 1
-    // {
+    method Remover(x:nat) returns (r:bool)
+    requires Conteudo != []
+    ensures !(x in old(Conteudo)) ==> (Conteudo == old(Conteudo))
+                                       && |Conteudo| == |old(Conteudo)|
+                                       && tail == old(tail)
+                                       && r == false
 
-    // }
+    ensures x in old(Conteudo) ==> Conteudo == old(Conteudo)[1..]
+                                    && |Conteudo| == |old(Conteudo)| - 1
+                                    && tail == old(tail) - 1
+                                    && r == true
+    
+    
+    {
+        var pertence := Pertence(x);
+        if(!pertence)
+        {
+            r := false;
+        } else {
+            
+        }
+    }
 
     method Pertence(x:nat) returns (r:bool)
     ensures r <==> x in Conteudo
     {
         var indice := 0;
         r := false;
+
+        // Iteração para identificar se o elemento existe
         while indice < tail
+        // Garante indice do laço dentro das delimitações do array
         invariant 0 <= indice <= tail
         invariant (indice > 0) ==> r == (x in Conteudo[0..indice])
-        invariant (indice == 0) ==> !r
+        // Determina que se o conjunto tiver menos que 1 elemento, 
+        // o resultado so pode ser o inverso de pertencer ao conjunto
+        invariant (indice < 1) ==> !r
+        // Para provar a terminação do loop
         decreases tail - indice
         {
-            if (elementos[indice] == x)
+            if (x == elementos[indice])
             {
                 r := true;
             }
