@@ -98,14 +98,15 @@ class {:autocontracts} Conjunto
                                     && tail == old(tail) - 1
                                     && r == true
     
-    
     {
         var pertence := Pertence(x);
         if(!pertence)
         {
             r := false;
-        } else {
-            
+        }
+        else
+        {
+            r := true;
         }
     }
 
@@ -132,8 +133,6 @@ class {:autocontracts} Conjunto
             }
             indice := indice + 1;
         }
-        
-        return r;
     }
 
     // Retorna natural representando o tamanho do conjunto através da
@@ -159,11 +158,13 @@ class {:autocontracts} Conjunto
     method Uniao(conj: Conjunto) returns (novo: Conjunto)
     requires |Conteudo| >= 0
     requires |conj.Conteudo| >= 0
+    ensures fresh(novo)
     ensures |novo.Conteudo| >= 0
+    ensures |novo.Conteudo| <= |Conteudo| + |conj.Conteudo|
     ensures forall i :: (0 <= i < |Conteudo|) ==> Conteudo[i] in novo.Conteudo
     ensures forall j :: (0 <= j < |conj.Conteudo|) ==> conj.Conteudo[j] in novo.Conteudo
     {
-        novo := new Conjunto(tail + conj.tail);
+        novo := new Conjunto(elementos.Length + conj.elementos.Length);
         
         var i := 0;
         var j := 0;
@@ -179,17 +180,14 @@ class {:autocontracts} Conjunto
         invariant 0 <= j <= conj.tail
         decreases conj.tail - j
         {
-            var teste := Pertence(conj.elementos[tail+j]);
-            if(!teste) {
-                var flag := novo.Adicionar(conj.elementos[tail+j]);
-            }
-            j := j + 1;
+            var flag := novo.Adicionar(conj.elementos[j]);
         }
     }
 
     method Intersecao(conj: Conjunto) returns (novo: Conjunto)
     requires |Conteudo| >= 0
     requires |conj.Conteudo| >= 0
+    ensures fresh(novo)
     ensures |novo.Conteudo| >= 0
     ensures forall i :: (0 <= i < |Conteudo|) ==> Conteudo[i] in novo.Conteudo
     ensures forall j :: (0 <= j < |conj.Conteudo|) ==> conj.Conteudo[j] in novo.Conteudo
@@ -198,7 +196,7 @@ class {:autocontracts} Conjunto
                         && (i != j) ==> novo.Conteudo[i]
                         != novo.Conteudo[j]
     {
-        novo := new Conjunto(tail + conj.tail);
+        novo := new Conjunto(elementos.Length + conj.elementos.Length);
         
         var i := 0;
         while(i < tail)
@@ -211,17 +209,18 @@ class {:autocontracts} Conjunto
                 var flag := novo.Adicionar(elementos[i]);
             }
             i := i + 1;
-        }
+    
     }
 
     method Diferenca(conj: Conjunto) returns (novo: Conjunto)
     requires |Conteudo| >= 0
     requires |conj.Conteudo| >= 0
+    ensures fresh(novo)
     ensures |novo.Conteudo| >= 0
     ensures forall i :: (0 <= i < |novo.Conteudo|) ==> ((novo.Conteudo[i] in Conteudo) && !(novo.Conteudo[i] in conj.Conteudo))
                     || (novo.Conteudo[i] in conj.Conteudo && !(novo.Conteudo[i] in Conteudo))
     {
-        novo := new Conjunto(tail + conj.tail);
+        novo := new Conjunto(elementos.Length + conj.elementos.Length);
 
         var i := 0;
         var j := 0;
@@ -247,7 +246,7 @@ class {:autocontracts} Conjunto
                 var flag := novo.Adicionar(conj.elementos[j]);
             }
             j := j + 1;
-        }
+    
     }
 }
 
@@ -285,5 +284,11 @@ method main()
     var resultadoTamanho2 := conjunto.Tamanho();
     assert resultadoTamanho2 == 2;
 
-
+    var conjunto2 := new Conjunto(5);
+    var dummy := conjunto2.Adicionar(3);
+    dummy := conjunto2.Adicionar(4);
+    dummy := conjunto2.Adicionar(5);
+    var resultadoUniao := conjunto.Uniao(conjunto2);
+    var testeUniao := resultadoUniao.Tamanho();
+    assert testeUniao == 5;
 }
