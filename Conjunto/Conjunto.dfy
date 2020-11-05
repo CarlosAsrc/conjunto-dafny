@@ -318,6 +318,11 @@ method main()
     var resultadoAdicao := conjunto.Adicionar(1);
     assert resultadoAdicao == true;
 
+    // Remoção de elemento no conjunto
+    var resultadoAdicao := conjunto.Adicionar(3);
+    var resultadoRemocao := conjunto.Remover(3);
+    assert resultadoRemocao == true;
+
     // Verificação se elemento pertence ao conjunto
     var resultadoPertence := conjunto.Pertence(1);
     assert resultadoPertence == true;
@@ -353,9 +358,9 @@ method main()
 
     // Teste de diferença de conjunto
     var conjunto4 := new Conjunto(5);
+    dummy := conjunto4.Adicionar(1);
     dummy := conjunto4.Adicionar(2);
-    dummy := conjunto4.Adicionar(4);
     dummy := conjunto4.Adicionar(5);
     var resultadoDiferenca := conjunto.Diferenca(conjunto4);
-    assert resultadoDiferenca.elementos[0] == 2;
+    assert resultadoDiferenca.elementos[0] == 5;
 }
