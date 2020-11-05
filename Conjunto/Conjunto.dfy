@@ -158,19 +158,28 @@ class {:autocontracts} Conjunto
     // Faz a união de um conjunto introduzido como parâmetro e o conjunto atual,
     // e retorna o resultado com "novo"
     method Uniao(conj: Conjunto) returns (novo: Conjunto)
-    // 
+    // Pré-condição que garante que o tamanho do conjunto original é maior ou igual a zero
     requires |Conteudo| >= 0
+    // Garante que o conjunto parâmetro é maior o igual a zero
     requires |conj.Conteudo| >= 0
+    // Assegura que a variável novo será recriada
     ensures fresh(novo)
-    ensures |novo.Conteudo| >= 0
-    ensures |novo.Conteudo| <= |Conteudo| + |conj.Conteudo|
+    // Averigua se o tamanho do conjunto de saída é maior ou igual a zero, e também
+    // no máximo igual ou menor que a soma dos dois conjuntos
+    ensures 0 <= |novo.Conteudo| <= |Conteudo| + |conj.Conteudo|
+    // Todo elemento que estava no conjunto original também deve estar no conjunto novo
     ensures forall i :: (0 <= i < |Conteudo|) ==> Conteudo[i] in novo.Conteudo
+    // Assim como todo elemento do conjunto dado como parâmetro deve pertencer ao conjunto novo
     ensures forall j :: (0 <= j < |conj.Conteudo|) ==> conj.Conteudo[j] in novo.Conteudo
     {
+        // Cria novo conjunto de tamanho máximo igual a soma dos doi conjuntos base
         novo := new Conjunto(elementos.Length + conj.elementos.Length);
         
+        // Variáveis auxiliares dos loops
         var i := 0;
         var j := 0;
+
+        // Percorre todos elementos do conjunto base e adiciona ao novo
         while (i < tail)
         invariant 0 <= i <= tail
         decreases tail - i
@@ -179,29 +188,37 @@ class {:autocontracts} Conjunto
             i := i + 1;
         }
 
+        // Mesma lógica do loop anterior, mas para conjunto do parâmetro
         while(j < conj.tail)
         invariant 0 <= j <= conj.tail
         decreases conj.tail - j
         {
+            // Caso o elemento já pertença ao conjunto novo, ele não é inserido
             var flag := novo.Adicionar(conj.elementos[j]);
         }
     }
 
+    // Faz a interseçao de um conjunto introduzido como parâmetro e o conjunto atual,
+    // e retorna o resultado com "novo"
     method Intersecao(conj: Conjunto) returns (novo: Conjunto)
+    // Mesmas condições iniciais do método anterior
     requires |Conteudo| >= 0
     requires |conj.Conteudo| >= 0
     ensures fresh(novo)
+    // Tamanho do conjunto de interseção deve ser maior ou igual a zero
     ensures |novo.Conteudo| >= 0
-    ensures forall i :: (0 <= i < |Conteudo|) ==> Conteudo[i] in novo.Conteudo
-    ensures forall j :: (0 <= j < |conj.Conteudo|) ==> conj.Conteudo[j] in novo.Conteudo
-    ensures forall i, j :: (0 <= i < |novo.Conteudo|)
-                        && (0 <= j < |novo.Conteudo|)
-                        && (i != j) ==> novo.Conteudo[i]
-                        != novo.Conteudo[j]
+    // Garante que cada elemento igual que pertencer a ambos conjuntos pertencerá ao novo
+    ensures forall i, j :: 0 <= i < |Conteudo|
+                        && 0 <= j < |conj.Conteudo|
+                        && Conteudo[i] == conj.Conteudo[j]
+                        ==> Conteudo[i] in novo.Conteudo
     {
         novo := new Conjunto(elementos.Length + conj.elementos.Length);
         
         var i := 0;
+
+        // Para todo elemento que pertencer ao conjunto original e ao conjunto
+        // dado com parâmetro, então adiciona-se o mesmo ao novo conjunto
         while(i < tail)
         invariant 0 <= i <= tail
         decreases tail - i
@@ -215,40 +232,42 @@ class {:autocontracts} Conjunto
         }
     }
 
+    // Faz a diferença de um conjunto introduzido como parâmetro e o conjunto atual,
+    // e retorna o resultado com "novo"
     method Diferenca(conj: Conjunto) returns (novo: Conjunto)
+    // Mesmas condições iniciais do método anterior
     requires |Conteudo| >= 0
     requires |conj.Conteudo| >= 0
     ensures fresh(novo)
+    // Tamanho do conjunto de diferença deve ser maior ou igual a zero
     ensures |novo.Conteudo| >= 0
-    ensures forall i :: (0 <= i < |novo.Conteudo|) ==> ((novo.Conteudo[i] in Conteudo) && !(novo.Conteudo[i] in conj.Conteudo))
-                    || (novo.Conteudo[i] in conj.Conteudo && !(novo.Conteudo[i] in Conteudo))
+    // Garante que cada elemento igual que pertencer a ambos conjuntos não pertencerá ao novo conjunto
+    ensures forall i, j :: 0 <= i < |Conteudo|
+                        && 0 <= j < |conj.Conteudo|
+                        && Conteudo[i] == conj.Conteudo[j]
+                        ==> Conteudo[i] !in novo.Conteudo
+    // E todos elementos diferentes, somente os do conjunto base pertencerão ao novo conjunto
+    ensures forall i, j :: 0 <= i < |Conteudo|
+                        && 0 <= j < |conj.Conteudo|
+                        && Conteudo[i] != conj.Conteudo[j]
+                        ==> Conteudo[i] in novo.Conteudo
     {
         novo := new Conjunto(elementos.Length + conj.elementos.Length);
 
         var i := 0;
-        var j := 0;
+        
+        // Para todo elemento que não pertencer ao conjunto original e ao conjunto
+        // dado com parâmetro, então adiciona-se o mesmo ao novo conjunto
         while(i < tail)
         invariant 0 <= i <= tail
         decreases tail - i
         {
-            var teste := Pertence(elementos[i]);
-            if(!teste)
+            var teste := conj.Pertence(elementos[i]);
+            if (!teste)
             {
                 var flag := novo.Adicionar(elementos[i]);
             }
             i := i + 1;
-        }
-
-        while(j < conj.tail)
-        invariant 0 <= j <= conj.tail
-        decreases conj.tail - j
-        {
-            var teste := Pertence(conj.elementos[j]);
-            if(!teste)
-            {
-                var flag := novo.Adicionar(conj.elementos[j]);
-            }
-            j := j + 1;
         }
     }
 }
