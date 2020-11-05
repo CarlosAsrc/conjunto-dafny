@@ -106,7 +106,27 @@ class {:autocontracts} Conjunto
         }
         else
         {
-            r := true;
+            var indice := 0;
+            // Iteração para identificar se o elemento existe
+            while indice < tail
+            // Garante indice do laço dentro das delimitações do array
+            invariant 0 <= indice <= tail
+            // Para provar a terminação do loop
+            decreases tail - indice
+            {
+                if (x == elementos[indice])
+                {
+                    
+                    tail := tail - 1;
+                    forall(i | 0 <= i < indice)
+                    {
+                        elementos[i] := elementos[i+1];
+                    }
+                    Conteudo := elementos[0..tail];
+                    r := true;
+                }
+                indice := indice + 1;
+            }
         }
     }
 
