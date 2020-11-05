@@ -88,11 +88,17 @@ class {:autocontracts} Conjunto
 
     method Remover(x:nat) returns (r:bool)
     requires Conteudo != []
+    // Garante que se o elemento não existe, o novo Conteudo
+    // será igual ao Conteudo antigo, e garante a resposta negativa
+    // de remoção do elemento.
     ensures !(x in old(Conteudo)) ==> (Conteudo == old(Conteudo))
                                        && |Conteudo| == |old(Conteudo)|
                                        && tail == old(tail)
                                        && r == false
-
+    // Garante que se o elemento existe, do novo Conteudo
+    // será descrescido o elemento x, o tamanho de Conteudo decrescido em 1
+    // a variavel tail decrescida em 1, e garante a resposta positiva
+    // de remoção do elemento.
     ensures x in old(Conteudo) ==> Conteudo == old(Conteudo)[1..]
                                     && |Conteudo| == |old(Conteudo)| - 1
                                     && tail == old(tail) - 1
@@ -113,15 +119,17 @@ class {:autocontracts} Conjunto
             invariant 0 <= indice <= tail
             // Para provar a terminação do loop
             decreases tail - indice
-            {
+            {   
+                // Verifica se a posição atual da iteração no array corresponde ao elemento x
                 if (x == elementos[indice])
                 {
-                    
+                    // Laço para remover elemento do array e trazer elementos do final para inicio (shift)
                     tail := tail - 1;
-                    forall(i | 0 <= i < indice)
+                    forall(i | indice <= i < tail)
                     {
                         elementos[i] := elementos[i+1];
                     }
+                    // Declaração da abstração Conteudo de acordo com os novos elementos da implementação concreta.
                     Conteudo := elementos[0..tail];
                     r := true;
                 }
@@ -307,6 +315,7 @@ method main()
     var resultadoTamanho2 := conjunto.Tamanho();
     assert resultadoTamanho2 == 2;
 
+    // Teste de união de conjunto
     var conjunto2 := new Conjunto(5);
     var dummy := conjunto2.Adicionar(3);
     dummy := conjunto2.Adicionar(4);
@@ -314,4 +323,20 @@ method main()
     var resultadoUniao := conjunto.Uniao(conjunto2);
     var testeUniao := resultadoUniao.elementos.Length;
     assert testeUniao == 5;
+
+    // Teste de interseção de conjunto
+    var conjunto3 := new Conjunto(5);
+    dummy := conjunto3.Adicionar(2);
+    dummy := conjunto3.Adicionar(4);
+    dummy := conjunto3.Adicionar(5);
+    var resultadoIntersecao := conjunto.Intersecao(conjunto3);
+    assert resultadoIntersecao.elementos[0] == 2;
+
+    // Teste de diferença de conjunto
+    var conjunto4 := new Conjunto(5);
+    dummy := conjunto4.Adicionar(2);
+    dummy := conjunto4.Adicionar(4);
+    dummy := conjunto4.Adicionar(5);
+    var resultadoDiferenca := conjunto.Diferenca(conjunto4);
+    assert resultadoDiferenca.elementos[0] == 2;
 }
