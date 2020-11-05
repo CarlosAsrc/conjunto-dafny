@@ -155,7 +155,10 @@ class {:autocontracts} Conjunto
         return tail == 0;
     }
 
+    // Faz a união de um conjunto introduzido como parâmetro e o conjunto atual,
+    // e retorna o resultado com "novo"
     method Uniao(conj: Conjunto) returns (novo: Conjunto)
+    // 
     requires |Conteudo| >= 0
     requires |conj.Conteudo| >= 0
     ensures fresh(novo)
@@ -209,7 +212,7 @@ class {:autocontracts} Conjunto
                 var flag := novo.Adicionar(elementos[i]);
             }
             i := i + 1;
-    
+        }
     }
 
     method Diferenca(conj: Conjunto) returns (novo: Conjunto)
@@ -246,7 +249,7 @@ class {:autocontracts} Conjunto
                 var flag := novo.Adicionar(conj.elementos[j]);
             }
             j := j + 1;
-    
+        }
     }
 }
 
@@ -289,6 +292,6 @@ method main()
     dummy := conjunto2.Adicionar(4);
     dummy := conjunto2.Adicionar(5);
     var resultadoUniao := conjunto.Uniao(conjunto2);
-    var testeUniao := resultadoUniao.Tamanho();
+    var testeUniao := resultadoUniao.elementos.Length;
     assert testeUniao == 5;
 }
